@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension version="3.1" type="plugin" group="system" method="upgrade">
+	<name>plg_system_usernotify</name>
+	<author>Ron Crans</author>
+	<creationDate>September 2015</creationDate>
+	<copyright>Copyright (C) 2015 RJCreations. All rights reserved.</copyright>
+	<license>GNU General Public License version 3 or later; see LICENSE.txt</license>
+	<authorEmail>ron@rjconline.net</authorEmail>
+	<authorUrl>rjconline.net</authorUrl>
+	<version>0.1.0</version>
+	<description>PLG_SYSTEM_USERNOTIFY_XML_DESCRIPTION</description>
+	<files>
+		<filename plugin="usernotify">usernotify.php</filename>
+		<filename>helper.php</filename>
+		<folder>language</folder>
+	</files>
+	<config>
+		<fields name="params">
+			<fieldset name="basic">
+				<field name="check_categories"
+					type="radio"
+					class="btn-group btn-group-yesno"
+					default="1"
+					description="PLG_SYSTEM_USERNOTIFY_FIELD_CHECK_CATEGORIES_DESC"
+					label="PLG_SYSTEM_USERNOTIFY_FIELD_CHECK_CATEGORIES_LABEL">
+					<option value="1">JYES</option>
+					<option value="0">JNO</option>
+				</field>
+				<field name="email_new_fe"
+					type="radio"
+					class="btn-group btn-group-yesno"
+					default="1"
+					description="PLG_SYSTEM_USERNOTIFY_FIELD_EMAIL_NEW_FE_DESC"
+					label="PLG_SYSTEM_USERNOTIFY_FIELD_EMAIL_NEW_FE_LABEL">
+					<option value="1">JYES</option>
+					<option value="0">JNO</option>
+				</field>
+			</fieldset>
+		</fields>
+	</config>
+</extension>
