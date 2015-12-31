@@ -1,4 +1,10 @@
 <?php
+/*
+* @package    User Notify System Plugin
+* @copyright  (C) 2015 RJCreations. All rights reserved.
+* @license    GNU General Public License version 3 or later; see LICENSE.txt
+*/
+
 defined('_JEXEC') or die;
 
 abstract class PlgUserNotifyHelper
