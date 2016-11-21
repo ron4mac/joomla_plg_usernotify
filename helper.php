@@ -1,7 +1,7 @@
 <?php
 /*
 * @package    User Notify System Plugin
-* @copyright  (C) 2015 RJCreations. All rights reserved.
+* @copyright  (C) 2016 RJCreations. All rights reserved.
 * @license    GNU General Public License version 3 or later; see LICENSE.txt
 */
 
@@ -45,6 +45,7 @@ abstract class PlgUserNotifyHelper
 
 		return $tmpl;
 	}
+
 
 	public static function getRecipients ($catid, $email=true, $updt=false)
 	{
@@ -108,6 +109,7 @@ abstract class PlgUserNotifyHelper
 		return $recips;
 	}
 
+
 	public static function getCatTitle ($id)
 	{
 		$db = JFactory::getDbo();
@@ -118,6 +120,7 @@ abstract class PlgUserNotifyHelper
 		$db->setQuery($query);
 		return $db->loadResult();
 	}
+
 
 	public static function getArticleHref ($article)
 	{

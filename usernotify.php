@@ -1,7 +1,7 @@
 <?php
 /*
 * @package    User Notify System Plugin
-* @copyright  (C) 2015 RJCreations. All rights reserved.
+* @copyright  (C) 2016 RJCreations. All rights reserved.
 * @license    GNU General Public License version 3 or later; see LICENSE.txt
 */
 
@@ -120,6 +120,8 @@ class PlgSystemUsernotify extends JPlugin
 	private function sendNotice ($addr, $subj, $body)
 	{
 		$mailer = JFactory::getMailer();
+		$mailer->XMailer = 'Joomla UserNotify';
+	//	$mailer->useSendmail();
 		$mailer->addRecipient($addr);
 		$mailer->setSubject($subj);
 		$mailer->isHTML(true);
