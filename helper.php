@@ -12,7 +12,9 @@ abstract class PlgUserNotifyHelper
 
 	public static function getComposedEmail ($parms, $cfg, $article, $email=true, $updt=false)
 	{
-		$tnam = $email ? 'email_tmpl' : 'sms_tmpl';
+		$tnam = $email ? 'email' : 'sms';
+		if ($updt) $tnam .= 'u';
+		$tnam .= '_tmpl';
 		$tmpl = $cfg[$tnam] ?: $parms->get($tnam, '');
 
 		if ($uppo = strpos($tmpl, '[[update]]')) {
@@ -47,25 +49,26 @@ abstract class PlgUserNotifyHelper
 	}
 
 
-	public static function getRecipients ($catid, $email=true, $updt=false)
+	public static function getRecipients ($ccfg, $email=true, $updt=false)
 	{
 		$db = JFactory::getDbo();
-		$grps = array(2);	// just registered for now ... at a later time, get from settings
+		$catid = $ccfg['cid'];
+		$grps = $ccfg['grps'];
+
+//		if ($updt) return array();
 
 		// get all users of groups
-		$query = $db->getQuery(true)
-			->select('user_id')
-			->from('#__user_usergroup_map')
-			->where('group_id IN ('.implode(',',$grps).')');
-		$db->setQuery($query);
-		$users = $db->loadColumn();		//echo'<xmp>';var_dump($catid,$users);
+	//	$query = $db->getQuery(true)
+	//		->select('user_id')
+	//		->from('#__user_usergroup_map')
+	//		->where('group_id IN ('.$grps.')');
+		$db->setQuery('SELECT DISTINCT user_id FROM #__user_usergroup_map WHERE group_id IN ('.$grps.')');
+		$users = $db->loadColumn();		var_dump($catid,$users);
+		if (!$users) return array();
 
 		// get all user configuration settings
-		$query->clear()
-			->select('*')
-			->from('#__usernotify_u');
-		$db->setQuery($query);
-		$ucfgs = $db->loadAssocList('uid');		//var_dump($ucfgs);
+		$db->setQuery('SELECT * FROM #__usernotify_u');
+		$ucfgs = $db->loadAssocList('uid');		var_dump($ucfgs);
 		// and remove those opting out from user list
 		foreach ($ucfgs as $k => $ucfg) {
 			if (!$ucfg['oo_all']) {
@@ -73,18 +76,16 @@ abstract class PlgUserNotifyHelper
 					unset($users[$key]);
 				}
 			}
+		//	$cdat = unserialize(base64_decode($ucfg['serdat']));
+		//	var_dump($ucfg,$cdat);
 		}
 
 		// get the users who have subscription settings for the category
-		$query->clear()
-			->select('*')
-			->from('#__usernotify_s')
-			->where('cid='.$catid);
-		$db->setQuery($query);
-		$usubs = $db->loadAssocList('uid');		//var_dump($usubs);
+		$db->setQuery('SELECT * FROM #__usernotify_uc WHERE catid='.$catid);
+		$usubs = $db->loadAssocList('uid');		var_dump($usubs);
 		// and remove from the user list those whose settings for the category inhibit the notification
 		foreach ($usubs as $k => $usub) {
-			if (($email && !$usub['email']) || (!$email && !$usub['sms']) || ($updt && !$usub['update'])) {
+			if (($email && !$usub['eml']) || (!$email && !$usub['sms']) || ($updt && !$usub['upd'])) {
 				while (($key = array_search($k, $users)) !== false) {
 					unset($users[$key]);
 				}
@@ -104,8 +105,7 @@ abstract class PlgUserNotifyHelper
 			}
 		}
 
-	//	var_dump($users,$recips);
-	//	echo'</xmp>';jexit();
+		var_dump($users,$recips);
 		return $recips;
 	}
 
