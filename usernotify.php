@@ -43,7 +43,7 @@ class PlgSystemUsernotify extends JPlugin
 	public function onContentAfterSave ($context, $article, $isNew)
 	{
 		// immediately return if not published or if not from a watched extension
-		if (($article->state == 0) || $this->ignoreEvent($context)) return true;
+		if (($article->state != 1) || $this->ignoreEvent($context)) return true;
 
 		// get the category's notification configuration
 		$ccfg = $this->getCatCfg($article->catid);
