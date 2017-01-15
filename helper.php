@@ -124,6 +124,9 @@ abstract class PlgUserNotifyHelper
 
 	public static function getArticleHref ($article)
 	{
+		$jrp = JUri::base(true);
+		require_once(JPATH_SITE.'/components/com_content/helpers/route.php');
+		return substr(JURI::root(), 0, -1) . substr(JRoute::_(ContentHelperRoute::getArticleRoute($article->id, $article->catid)), strlen($jrp));
 /*
 		require_once(JPATH_SITE.'/components/com_content/helpers/route.php');
 		if (JPATH_BASE == JPATH_ADMINISTRATOR) {
