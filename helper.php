@@ -38,7 +38,7 @@ abstract class PlgUserNotifyHelper
 						break;
 					case 'ITEM-LINK':
 						$rpl = self::getArticleHref($article);
-						$rpl = JHtml::link($rpl,$rpl);
+						$rpl = JHtml::link($rpl,htmlspecialchars($article->title));
 						break;
 				}
 				if ($rpl) $tmpl = str_replace('{{'.$mtch.'}}', $rpl, $tmpl);

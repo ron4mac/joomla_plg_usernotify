@@ -10,7 +10,8 @@ defined('_JEXEC') or die;
 class PlgSystemUsernotify extends JPlugin
 {
 	protected $cparms = null;	// com_usernotify params
-	protected $targs = null;	// targeted components/extensions
+	protected $useQ = true;		// use the notification queueing method
+	protected $qdb;				// db instance for queue
 	protected $_db;				// convenience db instance
 
 	public function __construct (&$subject, $config)
@@ -20,8 +21,8 @@ class PlgSystemUsernotify extends JPlugin
 		if (JComponentHelper::isInstalled('com_usernotify')) {
 			// get the com_usernotify options
 			$this->cparms = JComponentHelper::getParams('com_usernotify');
-			// extract the components that are being watched
-			$this->targs = $this->cparms->get('target',array());
+			// get queue setting
+			$this->useQ = $this->cparms->get('useQ', 1);
 			// get the database
 			$this->_db = JFactory::getDbo();
 			// setup some logging
@@ -129,9 +130,11 @@ class PlgSystemUsernotify extends JPlugin
 		// ignore if no com_usernotify
 		if (!$this->cparms) return true;
 
+		// extract the components that are being watched
+		$targs = $this->cparms->get('target', array());
 		// ignore if the context is not for a watched component
 		$ctxp = explode('.', $cntx);
-		if (!in_array($ctxp[0], $this->targs)) return true;
+		if (!in_array($ctxp[0], $targs)) return true;
 
 		return false;
 	}
@@ -143,8 +146,23 @@ class PlgSystemUsernotify extends JPlugin
 		require_once 'helper.php';
 		$recips = PlgUserNotifyHelper::getRecipients($ccfg, true, $upd);
 		$msg = PlgUserNotifyHelper::getComposedEmail($this->cparms, $ccfg, $article, true, $upd);
+		if ($this->useQ) {
+			$qfil = JPATH_SITE.'/tmp/unotifyqueue.sqlite';
+			$init = !file_exists($qfil);
+			$this->qdb = JDatabaseDriver::getInstance(array('driver'=>'sqlite','database'=>$qfil));
+			$this->qdb->setDebug(7);
+			$this->qdb->connect();
+			if ($init) {
+				$this->qdb->setQuery('CREATE TABLE `queue` (`q_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `addr` TEXT, `subj` TEXT, `body` TEXT)')->execute();
+			}
+			$this->qdb->setQuery('BEGIN TRANSACTION')->execute();
+		}
 		foreach ($recips as $recip) {
 			$this->sendNotice($recip['alt_email'] ?: $recip['email'], $this->cparms->get('subject', 'Notification'), $msg);
+		}
+		if ($this->useQ) {
+			$this->qdb->setQuery('COMMIT')->execute();
+			$this->qdb->disconnect();
 		}
 		$this->ldump(array('OB::'=>ob_get_contents()));
 		ob_end_clean();
@@ -153,6 +171,13 @@ class PlgSystemUsernotify extends JPlugin
 
 	private function sendNotice ($addr, $subj, $body)
 	{
+		if ($this->useQ) {
+			$addr = $this->qdb->quote($addr);
+			$subj = $this->qdb->quote($subj);
+			$body = $this->qdb->quote($body);
+			$this->qdb->setQuery('INSERT INTO `queue` (`addr`,`subj`,`body`) VALUES ('.$addr.','.$subj.','.$body.')')->execute();
+			return;
+		}
 		$mailer = JFactory::getMailer();
 		$mailer->XMailer = 'Joomla UserNotify';
 	//	$mailer->useSendmail();
