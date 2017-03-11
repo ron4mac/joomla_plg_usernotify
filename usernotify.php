@@ -73,7 +73,7 @@ class PlgSystemUsernotify extends JPlugin
 
 		$this->ldump(array('CS::','context'=>$context,'pks'=>$pks,'val'=>$value));	//return true;
 
-		$this->_db->setQuery('SELECT title,state,catid,publish_up FROM #__content WHERE id IN ('.implode(',', $pks).')');
+		$this->_db->setQuery('SELECT id,title,state,catid,publish_up FROM #__content WHERE id IN ('.implode(',', $pks).')');
 		$lst = $this->_db->loadAssocList();
 		foreach ($lst as $a) {
 			if ($a['state'] == 0) continue;
