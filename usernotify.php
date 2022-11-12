@@ -76,8 +76,8 @@ class PlgSystemUsernotify extends JPlugin
 		$this->_db->setQuery('SELECT id,title,state,catid,publish_up FROM #__content WHERE id IN ('.implode(',', $pks).')');
 		$lst = $this->_db->loadAssocList();
 		foreach ($lst as $a) {
-			if ($a['state'] == 0) continue;
-			if (time() - strtotime($a['publish_up']) > 10) continue;
+	//		if ($a['state'] == 0) continue;
+	//		if (time() - strtotime($a['publish_up']) > 10) continue;
 
 			// get the category's notification configuration
 			$ccfg = $this->getCatCfg($a['catid']);
@@ -107,11 +107,6 @@ class PlgSystemUsernotify extends JPlugin
 				->delete($db->quoteName('#__usernotify_u'))
 				->where($where);
 			$db->setQuery($query)->execute();
-
-			$query->clear()
-				->delete($db->quoteName('#__usernotify_s'))
-				->where($where);
-			$db->setQuery($query)->execute();
 		}
 		return $success;
 	}
@@ -129,6 +124,8 @@ class PlgSystemUsernotify extends JPlugin
 	{
 		// ignore if no com_usernotify
 		if (!$this->cparms) return true;
+
+		$this->ldump(array($cntx));
 
 		// extract the components that are being watched
 		$targs = $this->cparms->get('target', array());
